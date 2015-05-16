@@ -55,11 +55,10 @@ fn main() {
     };
 
     for e in window.events() {
-        if let Some(r) = e.render_args() {
-            app.render(&r);
-        }
-        if let Some(u) = e.update_args() {
-            app.update(&u);
+        match e {
+            Event::Render(r) => app.render(&r),
+            Event::Update(u) => app.update(&u),
+            _ => (),
         }
     }
 }
