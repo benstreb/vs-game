@@ -5,12 +5,14 @@ extern crate opengl_graphics;
 
 use piston::window::WindowSettings;
 use piston::event::*;
+use piston::input::{Input, Button, Key};
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
 
 pub struct App {
     gl: GlGraphics,
     rotation: f64,
+    paused: bool,
 }
 
 impl App {
@@ -33,7 +35,13 @@ impl App {
     }
 
     fn update(&mut self, args: &UpdateArgs) {
-        self.rotation += 2.0 * args.dt;
+        if !self.paused {
+            self.rotation += 2.0 * args.dt;
+        }
+    }
+
+    fn pause(&mut self) {
+        self.paused = !self.paused;
     }
 }
 
@@ -52,12 +60,14 @@ fn main() {
     let mut app = App{
         gl: GlGraphics::new(opengl),
         rotation: 0.0,
+        paused: false,
     };
 
     for e in window.events() {
         match e {
             Event::Render(r) => app.render(&r),
             Event::Update(u) => app.update(&u),
+            Event::Input(Input::Press(Button::Keyboard(Key::Space))) => app.pause(),
             _ => (),
         }
     }
