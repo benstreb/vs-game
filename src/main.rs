@@ -1,5 +1,6 @@
 extern crate piston;
 extern crate graphics;
+extern crate ai_behavior;
 extern crate sprite;
 extern crate glutin_window;
 extern crate opengl_graphics;
@@ -12,6 +13,7 @@ use piston::input::{Input, Button, Key};
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL, Texture};
 use sprite::{Sprite, Scene};
+use ai_behavior::{Sequence, Behavior};
 
 pub struct App {
     gl: GlGraphics,
@@ -20,7 +22,7 @@ pub struct App {
 }
 
 impl App {
-    fn render(&mut self, args: &RenderArgs) {
+    fn render(&mut self, args: &RenderArgs, scene: &Scene<Texture>) {
         use graphics::*;
 
         const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
@@ -28,6 +30,7 @@ impl App {
 
         self.gl.draw(args.viewport(), |c, gl| {
             clear(GREEN, gl);
+            scene.draw(c.transform, gl)
         });
     }
 
@@ -67,11 +70,11 @@ fn main() {
     sprite.set_position(100.0, 100.0);
 
     let id = scene.add_child(sprite);
+    scene.run(id, &Behavior::WaitForever);
 
     for e in window.events() {
-        scene.event(&e);
         match e {
-            Event::Render(r) => app.render(&r),
+            Event::Render(r) => app.render(&r, &scene),
             Event::Update(u) => app.update(&u),
             Event::Input(Input::Press(Button::Keyboard(key))) => match key {
                 Key::Space => app.pause(),
@@ -79,5 +82,6 @@ fn main() {
             },
             _ => (),
         }
+        scene.event(&e);
     }
 }

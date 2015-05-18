@@ -8,6 +8,7 @@ authors = [
 
 [[bin]]
 name = "vs-game-rust"
+path = "src/main.rs"
 
 [dependencies.piston]
 git = "https://github.com/PistonDevelopers/piston.git"
@@ -20,6 +21,9 @@ git = "https://github.com/PistonDevelopers/glutin_window.git"
 
 [dependencies.piston2d-opengl_graphics]
 git = "https://github.com/PistonDevelopers/opengl_graphics.git"
+
+[dependencies.piston-ai_behavior]
+git = "https://github.com/pistondevelopers/ai_behavior"
 
 [dependencies.piston2d-sprite]
 git = "https://github.com/pistondevelopers/sprite"
