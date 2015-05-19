@@ -27,3 +27,6 @@ git = "https://github.com/pistondevelopers/ai_behavior"
 
 [dependencies.piston2d-sprite]
 git = "https://github.com/pistondevelopers/sprite"
+
+[dependencies.uuid]
+git = "https://github.com/rust-lang/uuid"

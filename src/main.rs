@@ -1,5 +1,6 @@
 extern crate piston;
 extern crate graphics;
+extern crate uuid;
 extern crate ai_behavior;
 extern crate sprite;
 extern crate glutin_window;
@@ -7,6 +8,7 @@ extern crate opengl_graphics;
 
 use std::path::Path;
 use std::rc::Rc;
+use uuid::Uuid;
 use piston::window::WindowSettings;
 use piston::event::*;
 use piston::input::{Input, Button, Key};
@@ -34,9 +36,13 @@ impl App {
         });
     }
 
-    fn update(&mut self, args: &UpdateArgs) {
+    fn update(&mut self, args: &UpdateArgs, sprite: Uuid) {
         if !self.paused {
             self.rotation += 2.0 * args.dt;
+            let (sin, cos) = self.rotation.sin_cos();
+            self.game_scene.child_mut(sprite).map(|s|
+                s.set_position(100.0 + sin*20.0, 100.0 + cos*20.0)
+            );
         }
     }
 
@@ -72,6 +78,7 @@ fn main() {
     let tex = Path::new("./bin/assets/red_box.png");
     let tex = Rc::new(Texture::from_path(&tex).unwrap());
     let mut sprite = Sprite::from_texture(tex.clone());
+    let sprite_id = sprite.id();
     sprite.set_position(100.0, 100.0);
 
     let id = app.game_scene.add_child(sprite);
@@ -80,7 +87,7 @@ fn main() {
     for e in window.events() {
         match e {
             Event::Render(r) => app.render(&r, &mut gl),
-            Event::Update(u) => app.update(&u),
+            Event::Update(u) => app.update(&u, sprite_id),
             Event::Input(Input::Press(Button::Keyboard(key))) => match key {
                 Key::Space => app.pause(),
                 _ => (),

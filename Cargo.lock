@@ -8,6 +8,7 @@ dependencies = [
  "piston2d-opengl_graphics 0.0.16 (git+https://github.com/PistonDevelopers/opengl_graphics.git)",
  "piston2d-sprite 0.0.3 (git+https://github.com/pistondevelopers/sprite)",
  "pistoncore-glutin_window 0.0.8 (git+https://github.com/PistonDevelopers/glutin_window.git)",
+ "uuid 0.1.17 (git+https://github.com/rust-lang/uuid)",
 ]
 
 [[package]]
