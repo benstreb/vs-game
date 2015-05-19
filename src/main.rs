@@ -16,21 +16,21 @@ use sprite::{Sprite, Scene};
 use ai_behavior::{Sequence, Behavior};
 
 pub struct App {
-    gl: GlGraphics,
     rotation: f64,
     paused: bool,
+    game_scene: Box<Scene<Texture>>,
 }
 
 impl App {
-    fn render(&mut self, args: &RenderArgs, scene: &Scene<Texture>) {
+    fn render(&mut self, args: &RenderArgs, gl: &mut GlGraphics) {
         use graphics::*;
 
         const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
         const RED:   [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 
-        self.gl.draw(args.viewport(), |c, gl| {
+        gl.draw(args.viewport(), |c, gl| {
             clear(GREEN, gl);
-            scene.draw(c.transform, gl)
+            self.game_scene.draw(c.transform, gl)
         });
     }
 
@@ -42,6 +42,10 @@ impl App {
 
     fn pause(&mut self) {
         self.paused = !self.paused;
+    }
+
+    fn scene_event(&mut self, event: &Event) {
+        self.game_scene.event(event);
     }
 }
 
@@ -57,24 +61,25 @@ fn main() {
         .exit_on_esc(true)
     );
 
+    let mut gl = GlGraphics::new(opengl);
+
     let mut app = App{
-        gl: GlGraphics::new(opengl),
         rotation: 0.0,
         paused: false,
+        game_scene: Box::new(Scene::new()),
     };
 
-    let mut scene = Scene::new();
     let tex = Path::new("./bin/assets/red_box.png");
     let tex = Rc::new(Texture::from_path(&tex).unwrap());
     let mut sprite = Sprite::from_texture(tex.clone());
     sprite.set_position(100.0, 100.0);
 
-    let id = scene.add_child(sprite);
-    scene.run(id, &Behavior::WaitForever);
+    let id = app.game_scene.add_child(sprite);
+    app.game_scene.run(id, &Behavior::WaitForever);
 
     for e in window.events() {
         match e {
-            Event::Render(r) => app.render(&r, &scene),
+            Event::Render(r) => app.render(&r, &mut gl),
             Event::Update(u) => app.update(&u),
             Event::Input(Input::Press(Button::Keyboard(key))) => match key {
                 Key::Space => app.pause(),
@@ -82,6 +87,6 @@ fn main() {
             },
             _ => (),
         }
-        scene.event(&e);
+        app.scene_event(&e);
     }
 }
