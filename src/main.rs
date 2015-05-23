@@ -6,6 +6,8 @@ extern crate sprite;
 extern crate glutin_window;
 extern crate opengl_graphics;
 
+mod game;
+
 use std::path::Path;
 use std::rc::Rc;
 use uuid::Uuid;
