@@ -3,7 +3,7 @@ use piston::event::RenderArgs;
 use sprite::Scene;
 
 trait Game {
-    fn render(&self, gl: &mut GlGraphics, args: &RenderArgs);
+    fn event(&self, gl: &mut GlGraphics, event: &Event);
 }
 
 enum Tile {
@@ -19,6 +19,6 @@ struct UnnamedGame {
 }
 
 impl Game for UnnamedGame {
-    fn render(&self, gl: &mut GlGraphics, args: &RenderArgs) {
+    fn event(&self, gl: &mut GlGraphics, event: &Event) {
     }
 }
