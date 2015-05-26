@@ -20,9 +20,9 @@ impl TileColor {
     fn texture(&self) -> Rc<Texture> {
         Rc::new(Texture::from_path(Path::new(match self {
             &TileColor::RED => "./bin/assets/red_box.png",
-            &TileColor::GREEN => "./bin/assets/red_box.png",
-            &TileColor::BLUE => "./bin/assets/red_box.png",
-            &TileColor::YELLOW => "./bin/assets/red_box.png",
+            &TileColor::GREEN => "./bin/assets/green_box.png",
+            &TileColor::BLUE => "./bin/assets/blue_box.png",
+            &TileColor::YELLOW => "./bin/assets/yellow_box.png",
         })).unwrap())
     }
 }
