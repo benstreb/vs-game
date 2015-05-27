@@ -9,6 +9,7 @@ trait Game {
     fn event(&self, gl: &mut GlGraphics, event: &Event);
 }
 
+#[derive(Clone, Copy)]
 enum TileColor {
     RED,
     GREEN,
@@ -27,6 +28,7 @@ impl TileColor {
     }
 }
 
+#[derive(Clone, Copy)]
 struct Tile {
     color: TileColor,
     sprite_id: Uuid,
@@ -45,8 +47,19 @@ impl Tile {
 }
 
 struct UnnamedGame {
-    grid: [[Tile; 5]; 5],
+    grid: Box<[[Tile; 5]; 5]>,
     scene: Box<Scene<Texture>>,
+}
+
+impl UnnamedGame {
+    fn new() -> Box<Game> {
+        let mut scene = Scene::new();
+        let mut grid = [[Tile::new(TileColor::RED, &mut scene); 5]; 5];
+        Box::new(UnnamedGame {
+            grid: Box::new(grid),
+            scene: Box::new(scene),
+        })
+    }
 }
 
 impl Game for UnnamedGame {
