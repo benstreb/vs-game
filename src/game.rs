@@ -28,6 +28,10 @@ impl TileColor {
             &TileColor::YELLOW => "./bin/assets/yellow_box.png",
         })).unwrap())
     }
+
+    fn dims() -> (i32, i32) {
+        return (16, 16);
+    }
 }
 
 impl Rand for TileColor {
@@ -59,6 +63,10 @@ impl Tile {
             sprite_id: sprite_id,
         }
     }
+    fn set_position(&mut self, scene: &mut Scene<Texture>, pos: (f64, f64)) {
+        let (x, y) = pos;
+        scene.child_mut(self.sprite_id).map(|s| s.set_position(x, y));
+    }
 }
 
 struct UnnamedGame {
@@ -72,8 +80,11 @@ impl Game for UnnamedGame {
         let mut grid = [[None; 5]; 5];
         for i in 0..4 {
             for j in 0..4 {
-                grid[i][j] = Some(
-                    Tile::new(rng.gen(), &mut scene));
+                let mut tile = Tile::new(rng.gen(), &mut scene);
+                let (tile_width, tile_height) = TileColor::dims();
+                tile.set_position(&mut scene,
+                    ((tile_width*i) as f64, (tile_height*j) as f64));
+                grid[i as usize][j as usize] = Some(tile);
 
             }
         }
