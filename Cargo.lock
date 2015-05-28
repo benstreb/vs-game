@@ -8,6 +8,7 @@ dependencies = [
  "piston2d-opengl_graphics 0.0.16 (git+https://github.com/PistonDevelopers/opengl_graphics.git)",
  "piston2d-sprite 0.0.3 (git+https://github.com/pistondevelopers/sprite)",
  "pistoncore-glutin_window 0.0.8 (git+https://github.com/PistonDevelopers/glutin_window.git)",
+ "rand 0.3.8 (git+https://github.com/rust-lang/rand)",
  "uuid 0.1.17 (git+https://github.com/rust-lang/uuid)",
 ]
 
@@ -418,6 +419,14 @@ dependencies = [
 name = "pkg-config"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "rand"
+version = "0.3.8"
+source = "git+https://github.com/rust-lang/rand#2a6773de701d70499b0789f2c7e179947ef20224"
+dependencies = [
+ "libc 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "rand"

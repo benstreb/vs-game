@@ -1,11 +1,13 @@
 use std::path::Path;
 use std::rc::Rc;
 use uuid::Uuid;
+use rand::{Rand, Rng};
 use opengl_graphics::{GlGraphics, Texture};
 use piston::event::Event;
 use sprite::{Sprite, Scene};
 
 trait Game {
+    fn new<R: Rng>(rng: &mut R) -> Box<Self>;
     fn event(&self, gl: &mut GlGraphics, event: &Event);
 }
 
@@ -28,6 +30,19 @@ impl TileColor {
     }
 }
 
+impl Rand for TileColor {
+    fn rand<R: Rng>(rng: &mut R) -> Self {
+        use game::TileColor::*;
+        match rng.gen_range(1, 4) {
+            1 => RED,
+            2 => GREEN,
+            3 => BLUE,
+            4 => YELLOW,
+            _ => unreachable!()
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 struct Tile {
     color: TileColor,
@@ -47,22 +62,26 @@ impl Tile {
 }
 
 struct UnnamedGame {
-    grid: Box<[[Tile; 5]; 5]>,
+    grid: Box<[[Option<Tile>; 5]; 5]>,
     scene: Box<Scene<Texture>>,
 }
 
-impl UnnamedGame {
-    fn new() -> Box<Game> {
+impl Game for UnnamedGame {
+    fn new<R: Rng>(rng: &mut R) -> Box<Self> {
         let mut scene = Scene::new();
-        let mut grid = [[Tile::new(TileColor::RED, &mut scene); 5]; 5];
+        let mut grid = [[None; 5]; 5];
+        for i in 0..4 {
+            for j in 0..4 {
+                grid[i][j] = Some(
+                    Tile::new(rng.gen(), &mut scene));
+
+            }
+        }
         Box::new(UnnamedGame {
             grid: Box::new(grid),
             scene: Box::new(scene),
         })
     }
-}
-
-impl Game for UnnamedGame {
     fn event(&self, gl: &mut GlGraphics, event: &Event) {
     }
 }

@@ -30,3 +30,6 @@ git = "https://github.com/pistondevelopers/sprite"
 
 [dependencies.uuid]
 git = "https://github.com/rust-lang/uuid"
+
+[dependencies.rand]
+git = "https://github.com/rust-lang/rand"

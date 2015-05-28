@@ -5,6 +5,7 @@ extern crate ai_behavior;
 extern crate sprite;
 extern crate glutin_window;
 extern crate opengl_graphics;
+extern crate rand;
 
 mod game;
 
