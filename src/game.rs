@@ -36,8 +36,8 @@ impl TileColor {
 
 impl Rand for TileColor {
     fn rand<R: Rng>(rng: &mut R) -> Self {
-        use game::TileColor::*;
-        match rng.gen_range(1, 4) {
+        use self::TileColor::*;
+        match rng.gen_range(1, 5) {
             1 => RED,
             2 => GREEN,
             3 => BLUE,
@@ -78,12 +78,13 @@ impl Game for UnnamedGame {
     fn new<R: Rng>(rng: &mut R) -> Box<Self> {
         let mut scene = Scene::new();
         let mut grid = [[None; 5]; 5];
-        for i in 0..4 {
-            for j in 0..4 {
+        for i in 0..5 {
+            for j in 0..5 {
                 let mut tile = Tile::new(rng.gen(), &mut scene);
                 let (tile_width, tile_height) = TileColor::dims();
                 tile.set_position(&mut scene,
-                    ((tile_width*i) as f64, (tile_height*j) as f64));
+                    ((tile_width*i+tile_width/2) as f64,
+                     (tile_height*j+tile_height/2) as f64));
                 grid[i as usize][j as usize] = Some(tile);
 
             }
@@ -94,5 +95,16 @@ impl Game for UnnamedGame {
         })
     }
     fn event(&mut self, gl: &mut GlGraphics, e: &Event) {
+        use graphics::clear;
+        const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
+
+        self.scene.event(e);
+        match e {
+            &Event::Render(r) => gl.draw(r.viewport(), |c, gl| {
+                clear(WHITE, gl);
+                self.scene.draw(c.transform, gl)
+            }),
+            _ => (),
+        }
     }
 }
