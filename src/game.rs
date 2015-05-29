@@ -6,9 +6,9 @@ use opengl_graphics::{GlGraphics, Texture};
 use piston::event::Event;
 use sprite::{Sprite, Scene};
 
-trait Game {
+pub trait Game {
     fn new<R: Rng>(rng: &mut R) -> Box<Self>;
-    fn event(&self, gl: &mut GlGraphics, event: &Event);
+    fn event(&mut self, gl: &mut GlGraphics, event: &Event);
 }
 
 #[derive(Clone, Copy)]
@@ -69,7 +69,7 @@ impl Tile {
     }
 }
 
-struct UnnamedGame {
+pub struct UnnamedGame {
     grid: Box<[[Option<Tile>; 5]; 5]>,
     scene: Box<Scene<Texture>>,
 }
@@ -93,6 +93,6 @@ impl Game for UnnamedGame {
             scene: Box::new(scene),
         })
     }
-    fn event(&self, gl: &mut GlGraphics, event: &Event) {
+    fn event(&mut self, gl: &mut GlGraphics, e: &Event) {
     }
 }
