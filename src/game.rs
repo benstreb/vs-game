@@ -72,16 +72,17 @@ impl Tile {
 pub struct UnnamedGame {
     grid: Box<[[Option<Tile>; 5]; 5]>,
     scene: Box<Scene<Texture>>,
+    player_id: Uuid,
 }
 
 impl Game for UnnamedGame {
     fn new<R: Rng>(rng: &mut R) -> Box<Self> {
+        let (tile_width, tile_height) = TileColor::dims();
         let mut scene = Scene::new();
         let mut grid = [[None; 5]; 5];
         for i in 0..5 {
             for j in 0..5 {
                 let mut tile = Tile::new(rng.gen(), &mut scene);
-                let (tile_width, tile_height) = TileColor::dims();
                 tile.set_position(&mut scene,
                     ((tile_width*i+tile_width/2) as f64,
                      (tile_height*j+tile_height/2) as f64));
@@ -89,9 +90,15 @@ impl Game for UnnamedGame {
 
             }
         }
+        let mut player = Sprite::from_texture(Rc::new(Texture::from_path(
+            Path::new("./bin/assets/player.png")).unwrap()));
+        player.set_position((tile_width/2) as f64, (tile_height/2) as f64);
+        let player_id = player.id();
+        scene.add_child(player);
         Box::new(UnnamedGame {
             grid: Box::new(grid),
             scene: Box::new(scene),
+            player_id: player_id,
         })
     }
     fn event(&mut self, gl: &mut GlGraphics, e: &Event) {
