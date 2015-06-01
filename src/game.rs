@@ -11,7 +11,6 @@ use sprite::{Sprite, Scene};
 pub trait Game {
     fn new<R: Rng>(rng: &mut R) -> Box<Self>;
     fn event(&mut self, gl: &mut GlGraphics, event: &Event);
-    fn move_player(&mut self, d: Direction);
 }
 
 #[derive(Clone, Copy)]
@@ -115,6 +114,18 @@ pub struct UnnamedGame {
     player_id: Uuid,
 }
 
+impl UnnamedGame {
+    fn move_player(&mut self, d: Direction) {
+        self.player_coords = self.player_coords + d.coord_delta();
+        let (tile_width, tile_height) = TileColor::dims();
+        let Coord{x, y} = self.player_coords;
+        self.scene.child_mut(self.player_id).map(|p| p.set_position(
+            tile_width as f64 * (x as f64 + 0.5),
+            tile_height as f64 * (y as f64 + 0.5),
+        ));
+    }
+}
+
 impl Game for UnnamedGame {
     fn new<R: Rng>(rng: &mut R) -> Box<Self> {
         let (tile_width, tile_height) = TileColor::dims();
@@ -141,16 +152,6 @@ impl Game for UnnamedGame {
             player_coords: Coord{x: 0, y: 0},
             player_id: player_id,
         })
-    }
-
-    fn move_player(&mut self, d: Direction) {
-        self.player_coords = self.player_coords + d.coord_delta();
-        let (tile_width, tile_height) = TileColor::dims();
-        let Coord{x, y} = self.player_coords;
-        self.scene.child_mut(self.player_id).map(|p| p.set_position(
-            tile_width as f64 * (x as f64 + 0.5),
-            tile_height as f64 * (y as f64 + 0.5),
-        ));
     }
 
     fn event(&mut self, gl: &mut GlGraphics, e: &Event) {
