@@ -1,14 +1,17 @@
 use std::path::Path;
 use std::rc::Rc;
+use std::ops::Add;
 use uuid::Uuid;
 use rand::{Rand, Rng};
 use opengl_graphics::{GlGraphics, Texture};
 use piston::event::Event;
+use piston::input::{Input, Button, Key};
 use sprite::{Sprite, Scene};
 
 pub trait Game {
     fn new<R: Rng>(rng: &mut R) -> Box<Self>;
     fn event(&mut self, gl: &mut GlGraphics, event: &Event);
+    fn move_player(&mut self, d: Direction);
 }
 
 #[derive(Clone, Copy)]
@@ -48,6 +51,42 @@ impl Rand for TileColor {
 }
 
 #[derive(Clone, Copy)]
+struct Coord {
+    x: i32,
+    y: i32,
+}
+
+impl Add for Coord {
+    type Output = Coord;
+
+    fn add(self, rhs: Coord) -> Coord {
+        Coord {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+impl Direction {
+    fn coord_delta(self) -> Coord {
+        use self::Direction::*;
+        match self {
+            Up => Coord{x: 0, y: -1},
+            Down => Coord{x: 0, y: 1},
+            Left => Coord{x: -1, y: 0},
+            Right => Coord{x: 1, y: 0},
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
 struct Tile {
     color: TileColor,
     sprite_id: Uuid,
@@ -72,6 +111,7 @@ impl Tile {
 pub struct UnnamedGame {
     grid: Box<[[Option<Tile>; 5]; 5]>,
     scene: Box<Scene<Texture>>,
+    player_coords: Coord,
     player_id: Uuid,
 }
 
@@ -98,9 +138,21 @@ impl Game for UnnamedGame {
         Box::new(UnnamedGame {
             grid: Box::new(grid),
             scene: Box::new(scene),
+            player_coords: Coord{x: 0, y: 0},
             player_id: player_id,
         })
     }
+
+    fn move_player(&mut self, d: Direction) {
+        self.player_coords = self.player_coords + d.coord_delta();
+        let (tile_width, tile_height) = TileColor::dims();
+        let Coord{x, y} = self.player_coords;
+        self.scene.child_mut(self.player_id).map(|p| p.set_position(
+            tile_width as f64 * (x as f64 + 0.5),
+            tile_height as f64 * (y as f64 + 0.5),
+        ));
+    }
+
     fn event(&mut self, gl: &mut GlGraphics, e: &Event) {
         use graphics::clear;
         const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
@@ -111,6 +163,14 @@ impl Game for UnnamedGame {
                 clear(WHITE, gl);
                 self.scene.draw(c.transform, gl)
             }),
+            &Event::Input(Input::Press(Button::Keyboard(k))) => 
+                match k {
+                    Key::Up => self.move_player(Direction::Up),
+                    Key::Down => self.move_player(Direction::Down),
+                    Key::Left => self.move_player(Direction::Left),
+                    Key::Right => self.move_player(Direction::Right),
+                    _ => (),
+                },
             _ => (),
         }
     }
