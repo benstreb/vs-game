@@ -107,8 +107,11 @@ impl Tile {
     }
 }
 
+const WIDTH: usize = 5;
+const HEIGHT: usize = 5;
+
 pub struct UnnamedGame {
-    grid: Box<[[Option<Tile>; 5]; 5]>,
+    grid: Box<[[Option<Tile>; HEIGHT]; WIDTH]>,
     scene: Box<Scene<Texture>>,
     player_coords: Coord,
     player_id: Uuid,
@@ -130,13 +133,13 @@ impl Game for UnnamedGame {
     fn new<R: Rng>(rng: &mut R) -> Box<Self> {
         let (tile_width, tile_height) = TileColor::dims();
         let mut scene = Scene::new();
-        let mut grid = [[None; 5]; 5];
-        for i in 0..5 {
-            for j in 0..5 {
+        let mut grid = [[None; HEIGHT]; WIDTH];
+        for i in 0..WIDTH {
+            for j in 0..HEIGHT {
                 let mut tile = Tile::new(rng.gen(), &mut scene);
                 tile.set_position(&mut scene,
-                    ((tile_width*i+tile_width/2) as f64,
-                     (tile_height*j+tile_height/2) as f64));
+                    (tile_width as f64 * (i as f64 + 0.5),
+                     tile_height as f64 * (j as f64 + 0.5)));
                 grid[i as usize][j as usize] = Some(tile);
 
             }
