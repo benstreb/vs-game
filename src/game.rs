@@ -49,23 +49,6 @@ impl Rand for TileColor {
     }
 }
 
-#[derive(Clone, Copy)]
-struct Coord {
-    x: i32,
-    y: i32,
-}
-
-impl Add for Coord {
-    type Output = Coord;
-
-    fn add(self, rhs: Coord) -> Coord {
-        Coord {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-        }
-    }
-}
-
 enum Direction {
     Up,
     Down,
@@ -74,13 +57,13 @@ enum Direction {
 }
 
 impl Direction {
-    fn coord_delta(self) -> Coord {
+    fn coord_delta(self) -> (i32, i32) {
         use self::Direction::*;
         match self {
-            Up => Coord{x: 0, y: -1},
-            Down => Coord{x: 0, y: 1},
-            Left => Coord{x: -1, y: 0},
-            Right => Coord{x: 1, y: 0},
+            Up => (0, -1),
+            Down => (0, 1),
+            Left => (-1, 0),
+            Right => (1, 0),
         }
     }
 }
@@ -107,21 +90,28 @@ impl Tile {
     }
 }
 
-const WIDTH: usize = 5;
-const HEIGHT: usize = 5;
+const WIDTH: i32 = 5;
+const HEIGHT: i32 = 5;
 
 pub struct UnnamedGame {
-    grid: Box<[[Option<Tile>; HEIGHT]; WIDTH]>,
+    grid: Box<[[Option<Tile>; HEIGHT as usize]; WIDTH as usize]>,
     scene: Box<Scene<Texture>>,
-    player_coords: Coord,
+    player_coords: (i32, i32),
     player_id: Uuid,
 }
 
 impl UnnamedGame {
     fn move_player(&mut self, d: Direction) {
-        self.player_coords = self.player_coords + d.coord_delta();
+        use utils::clamp;
+        let (p_x, p_y) = self.player_coords;
+        let (x_delta, y_delta) = d.coord_delta();
+        let (x, y) = (
+            clamp(p_x + x_delta, 0, WIDTH-1),
+            clamp(p_y + y_delta, 0, HEIGHT-1)
+        );
+
+        self.player_coords = (x, y);
         let (tile_width, tile_height) = TileColor::dims();
-        let Coord{x, y} = self.player_coords;
         self.scene.child_mut(self.player_id).map(|p| p.set_position(
             tile_width as f64 * (x as f64 + 0.5),
             tile_height as f64 * (y as f64 + 0.5),
@@ -133,7 +123,7 @@ impl Game for UnnamedGame {
     fn new<R: Rng>(rng: &mut R) -> Box<Self> {
         let (tile_width, tile_height) = TileColor::dims();
         let mut scene = Scene::new();
-        let mut grid = [[None; HEIGHT]; WIDTH];
+        let mut grid = [[None; HEIGHT as usize]; WIDTH as usize];
         for i in 0..WIDTH {
             for j in 0..HEIGHT {
                 let mut tile = Tile::new(rng.gen(), &mut scene);
@@ -152,7 +142,7 @@ impl Game for UnnamedGame {
         Box::new(UnnamedGame {
             grid: Box::new(grid),
             scene: Box::new(scene),
-            player_coords: Coord{x: 0, y: 0},
+            player_coords: (0, 0),
             player_id: player_id,
         })
     }

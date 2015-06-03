@@ -8,6 +8,7 @@ extern crate opengl_graphics;
 extern crate rand;
 
 mod game;
+mod utils;
 
 use rand::thread_rng;
 use piston::window::WindowSettings;
