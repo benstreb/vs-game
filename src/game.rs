@@ -1,6 +1,6 @@
 use std::path::Path;
 use std::rc::Rc;
-use std::ops::Add;
+use std::ops::Index;
 use uuid::Uuid;
 use rand::{Rand, Rng};
 use opengl_graphics::{GlGraphics, Texture};
@@ -93,8 +93,40 @@ impl Tile {
 const WIDTH: i32 = 5;
 const HEIGHT: i32 = 5;
 
-pub struct UnnamedGame {
+struct Grid {
     grid: Box<[[Option<Tile>; HEIGHT as usize]; WIDTH as usize]>,
+}
+
+impl Index<(i32, i32)> for Grid{
+    type Output = Option<Tile>;
+
+    fn index(&self, indexes: (i32, i32)) -> &Option<Tile> {
+        let (x, y) = indexes;
+        &self.grid[x as usize][y as usize]
+    }
+}
+
+impl Grid {
+    fn new<R: Rng>(rng: &mut R, scene: &mut Scene<Texture>) -> Self {
+        let (tile_width, tile_height) = TileColor::dims();
+        let mut grid = Box::new([[None; HEIGHT as usize]; WIDTH as usize]);
+        for i in 0..WIDTH {
+            for j in 0..HEIGHT {
+                let mut tile = Tile::new(rng.gen(), scene);
+                tile.set_position(scene,
+                    (tile_width as f64 * (i as f64 + 0.5),
+                     tile_height as f64 * (j as f64 + 0.5)));
+                grid[i as usize][j as usize] = Some(tile);
+            }
+        }
+        Grid {
+            grid: grid,
+        }
+    }
+}
+
+pub struct UnnamedGame {
+    grid: Grid,
     scene: Box<Scene<Texture>>,
     player_coords: (i32, i32),
     player_id: Uuid,
@@ -123,24 +155,14 @@ impl Game for UnnamedGame {
     fn new<R: Rng>(rng: &mut R) -> Box<Self> {
         let (tile_width, tile_height) = TileColor::dims();
         let mut scene = Scene::new();
-        let mut grid = [[None; HEIGHT as usize]; WIDTH as usize];
-        for i in 0..WIDTH {
-            for j in 0..HEIGHT {
-                let mut tile = Tile::new(rng.gen(), &mut scene);
-                tile.set_position(&mut scene,
-                    (tile_width as f64 * (i as f64 + 0.5),
-                     tile_height as f64 * (j as f64 + 0.5)));
-                grid[i as usize][j as usize] = Some(tile);
-
-            }
-        }
+        let mut grid = Grid::new(rng, &mut scene);
         let mut player = Sprite::from_texture(Rc::new(Texture::from_path(
             Path::new("./bin/assets/player.png")).unwrap()));
         player.set_position((tile_width/2) as f64, (tile_height/2) as f64);
         let player_id = player.id();
         scene.add_child(player);
         Box::new(UnnamedGame {
-            grid: Box::new(grid),
+            grid: grid,
             scene: Box::new(scene),
             player_coords: (0, 0),
             player_id: player_id,
