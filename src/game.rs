@@ -1,6 +1,6 @@
 use std::path::Path;
 use std::rc::Rc;
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 use uuid::Uuid;
 use rand::{Rand, Rng};
 use opengl_graphics::{GlGraphics, Texture};
@@ -106,6 +106,13 @@ impl Index<(i32, i32)> for Grid{
     }
 }
 
+impl IndexMut<(i32, i32)> for Grid{
+    fn index_mut(&mut self, indexes: (i32, i32)) -> &mut Option<Tile> {
+        let (x, y) = indexes;
+        &mut self.grid[x as usize][y as usize]
+    }
+}
+
 impl Grid {
     fn new<R: Rng>(rng: &mut R, scene: &mut Scene<Texture>) -> Self {
         let (tile_width, tile_height) = TileColor::dims();
@@ -149,6 +156,13 @@ impl UnnamedGame {
             tile_height as f64 * (y as f64 + 0.5),
         ));
     }
+
+    fn attack(&mut self) {
+        if let Some(tile) = self.grid[self.player_coords] {
+            self.scene.remove_child(tile.sprite_id);
+            self.grid[self.player_coords] = None;
+        }
+    }
 }
 
 impl Game for UnnamedGame {
@@ -185,6 +199,7 @@ impl Game for UnnamedGame {
                     Key::Down => self.move_player(Direction::Down),
                     Key::Left => self.move_player(Direction::Left),
                     Key::Right => self.move_player(Direction::Right),
+                    Key::Return => self.attack(),
                     _ => (),
                 },
             _ => (),
