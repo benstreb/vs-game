@@ -14,7 +14,7 @@ use rand::thread_rng;
 use piston::window::WindowSettings;
 use piston::event::Events;
 use glutin_window::GlutinWindow as Window;
-use opengl_graphics::{GlGraphics, OpenGL, Texture};
+use opengl_graphics::{GlGraphics, OpenGL};
 use game::{Game, UnnamedGame};
 
 fn main() {

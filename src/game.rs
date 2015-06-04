@@ -76,7 +76,7 @@ struct Tile {
 
 impl Tile {
     fn new(color: TileColor, scene: &mut Scene<Texture>) -> Tile {
-        let mut sprite = Sprite::from_texture(color.texture());
+        let sprite = Sprite::from_texture(color.texture());
         let sprite_id = sprite.id();
         scene.add_child(sprite);
         Tile {
@@ -169,7 +169,7 @@ impl Game for UnnamedGame {
     fn new<R: Rng>(rng: &mut R) -> Box<Self> {
         let (tile_width, tile_height) = TileColor::dims();
         let mut scene = Scene::new();
-        let mut grid = Grid::new(rng, &mut scene);
+        let grid = Grid::new(rng, &mut scene);
         let mut player = Sprite::from_texture(Rc::new(Texture::from_path(
             Path::new("./bin/assets/player.png")).unwrap()));
         player.set_position((tile_width/2) as f64, (tile_height/2) as f64);
