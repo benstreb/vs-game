@@ -6,7 +6,8 @@ use rand::{Rand, Rng};
 use opengl_graphics::{GlGraphics, Texture};
 use piston::event::Event;
 use piston::input::{Input, Button, Key};
-use sprite::{Sprite, Scene};
+use ai_behavior::{Sequence, Action};
+use sprite::{Sprite, Scene, Ease, EaseFunction, MoveBy};
 
 pub trait Game {
     fn new<R: Rng>(rng: &mut R) -> Box<Self>;
@@ -151,10 +152,12 @@ impl UnnamedGame {
 
         self.player_coords = (x, y);
         let (tile_width, tile_height) = TileColor::dims();
-        self.scene.child_mut(self.player_id).map(|p| p.set_position(
-            tile_width as f64 * (x as f64 + 0.5),
-            tile_height as f64 * (y as f64 + 0.5),
-        ));
+        let move_seq = Sequence(vec![
+            Action(Ease(EaseFunction::ExponentialInOut,
+                        Box::new(MoveBy(1.0,
+                                        (tile_width*x_delta) as f64,
+                                        (tile_height*y_delta) as f64))))]);
+        self.scene.run(self.player_id, &move_seq);
     }
 
     fn attack(&mut self) {
