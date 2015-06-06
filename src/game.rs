@@ -142,22 +142,24 @@ pub struct UnnamedGame {
 
 impl UnnamedGame {
     fn move_player(&mut self, d: Direction) {
-        use utils::clamp;
-        let (p_x, p_y) = self.player_coords;
-        let (x_delta, y_delta) = d.coord_delta();
-        let (x, y) = (
-            clamp(p_x + x_delta, 0, WIDTH-1),
-            clamp(p_y + y_delta, 0, HEIGHT-1)
-        );
+        if self.scene.running() == 0 {
+            use utils::clamp;
+            let (p_x, p_y) = self.player_coords;
+            let (x_delta, y_delta) = d.coord_delta();
+            let (x, y) = (
+                clamp(p_x + x_delta, 0, WIDTH-1),
+                clamp(p_y + y_delta, 0, HEIGHT-1)
+            );
 
-        self.player_coords = (x, y);
-        let (tile_width, tile_height) = TileColor::dims();
-        let move_seq = Sequence(vec![
-            Action(Ease(EaseFunction::ExponentialInOut,
-                        Box::new(MoveBy(1.0,
-                                        (tile_width*x_delta) as f64,
-                                        (tile_height*y_delta) as f64))))]);
-        self.scene.run(self.player_id, &move_seq);
+            self.player_coords = (x, y);
+            let (tile_width, tile_height) = TileColor::dims();
+            let move_seq = Sequence(vec![Action(
+                Ease(EaseFunction::ExponentialInOut,
+                     Box::new(MoveBy(0.5,
+                                     (tile_width*x_delta) as f64,
+                                     (tile_height*y_delta) as f64))))]);
+            self.scene.run(self.player_id, &move_seq);
+        }
     }
 
     fn attack(&mut self) {
