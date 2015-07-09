@@ -204,7 +204,7 @@ impl Game for UnnamedGame {
                     Key::Down => self.move_player(Direction::Down),
                     Key::Left => self.move_player(Direction::Left),
                     Key::Right => self.move_player(Direction::Right),
-                    Key::Return => self.attack(),
+                    Key::Return | Key::Space => self.attack(),
                     _ => (),
                 },
             _ => (),
