@@ -143,15 +143,17 @@ pub struct UnnamedGame {
 impl UnnamedGame {
     fn move_player(&mut self, d: Direction) {
         if self.scene.running() == 0 {
-            use utils::clamp;
-            let (p_x, p_y) = self.player_coords;
-            let (x_delta, y_delta) = d.coord_delta();
-            let (x, y) = (
-                clamp(p_x + x_delta, 0, WIDTH-1),
-                clamp(p_y + y_delta, 0, HEIGHT-1)
+            use utils::move_clamp;
+            let (x_delta, y_delta) = move_clamp(
+                d.coord_delta(),
+                self.player_coords,
+                (WIDTH, HEIGHT),
             );
-
-            self.player_coords = (x, y);
+            let (p_x, p_y) = self.player_coords;
+            self.player_coords = (
+                p_x + x_delta,
+                p_y + y_delta,
+            );
             let (tile_width, tile_height) = TileColor::dims();
             let move_seq = Sequence(vec![Action(
                 Ease(EaseFunction::ExponentialInOut,
