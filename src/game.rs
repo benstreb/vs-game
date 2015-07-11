@@ -131,6 +131,17 @@ impl Grid {
             grid: grid,
         }
     }
+
+    fn replace<R: Rng>(&mut self, rng: &mut R, scene: &mut Scene<Texture>) {
+        for i in 0..WIDTH {
+            for j in 0..HEIGHT {
+                self.grid[i as usize][j as usize] =
+                    self.grid[i as usize][j as usize].or_else(||
+                        Some(Tile::new(rng.gen(), scene))
+                    );
+            }
+        }
+    }
 }
 
 pub struct UnnamedGame {
