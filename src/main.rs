@@ -31,9 +31,9 @@ fn main() {
 
     let mut gl = GlGraphics::new(opengl);
 
-    let mut rand = rand::thread_rng();
+    let rand = rand::thread_rng();
 
-    let mut game = game::UnnamedGame::new(&mut rand);
+    let mut game = game::UnnamedGame::new(Box::new(rand));
 
     for e in window.events() {
         game.event(&mut gl, &e);

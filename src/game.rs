@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::rc::Rc;
 use std::ops::{Index, IndexMut};
+use std::borrow::BorrowMut;
 use uuid::Uuid;
 use rand::{Rand, Rng};
 use opengl_graphics::{GlGraphics, Texture};
@@ -9,8 +10,8 @@ use piston::input::{Input, Button, Key};
 use ai_behavior::{Sequence, Action};
 use sprite::{Sprite, Scene, Ease, EaseFunction, MoveBy};
 
-pub trait Game {
-    fn new<R: Rng>(rng: &mut R) -> Box<Self>;
+pub trait Game<R: Rng> {
+    fn new(rng: Box<R>) -> Box<Self>;
     fn event(&mut self, gl: &mut GlGraphics, event: &Event);
 }
 
@@ -144,14 +145,15 @@ impl Grid {
     }
 }
 
-pub struct UnnamedGame {
+pub struct UnnamedGame<R: Rng> {
     grid: Grid,
     scene: Box<Scene<Texture>>,
+    rng: Box<R>,
     player_coords: (i32, i32),
     player_id: Uuid,
 }
 
-impl UnnamedGame {
+impl<R: Rng> UnnamedGame<R> {
     fn move_player(&mut self, d: Direction) {
         if self.scene.running() == 0 {
             use utils::move_clamp;
@@ -183,11 +185,11 @@ impl UnnamedGame {
     }
 }
 
-impl Game for UnnamedGame {
-    fn new<R: Rng>(rng: &mut R) -> Box<Self> {
+impl<R: Rng> Game<R> for UnnamedGame<R> {
+    fn new(mut rng: Box<R>) -> Box<Self> {
         let (tile_width, tile_height) = TileColor::dims();
         let mut scene = Scene::new();
-        let grid = Grid::new(rng, &mut scene);
+        let grid = Grid::new::<R>(rng.borrow_mut(), &mut scene);
         let mut player = Sprite::from_texture(Rc::new(Texture::from_path(
             Path::new("./bin/assets/player.png")).unwrap()));
         player.set_position((tile_width/2) as f64, (tile_height/2) as f64);
@@ -196,6 +198,7 @@ impl Game for UnnamedGame {
         Box::new(UnnamedGame {
             grid: grid,
             scene: Box::new(scene),
+            rng: rng,
             player_coords: (0, 0),
             player_id: player_id,
         })
@@ -207,6 +210,12 @@ impl Game for UnnamedGame {
 
         self.scene.event(e);
         match e {
+            &Event::Update(_) => {
+                self.grid.replace::<R>(
+                    self.rng.borrow_mut(),
+                    self.scene.borrow_mut()
+                )
+            },
             &Event::Render(r) => gl.draw(r.viewport(), |c, gl| {
                 clear(WHITE, gl);
                 self.scene.draw(c.transform, gl)
