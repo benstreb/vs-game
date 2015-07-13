@@ -77,18 +77,16 @@ struct Tile {
 }
 
 impl Tile {
-    fn new(color: TileColor, scene: &mut Scene<Texture>) -> Tile {
-        let sprite = Sprite::from_texture(color.texture());
+    fn new(color: TileColor, scene: &mut Scene<Texture>, pos: (f64, f64)) -> Tile {
+        let mut sprite = Sprite::from_texture(color.texture());
+        let (x, y) = pos;
+        sprite.set_position(x, y);
         let sprite_id = sprite.id();
         scene.add_child(sprite);
         Tile {
             color: color,
             sprite_id: sprite_id,
         }
-    }
-    fn set_position(&mut self, scene: &mut Scene<Texture>, pos: (f64, f64)) {
-        let (x, y) = pos;
-        scene.child_mut(self.sprite_id).map(|s| s.set_position(x, y));
     }
 }
 
@@ -117,14 +115,10 @@ impl IndexMut<(i32, i32)> for Grid{
 
 impl Grid {
     fn new<R: Rng>(rng: &mut R, scene: &mut Scene<Texture>) -> Self {
-        let (tile_width, tile_height) = TileColor::dims();
         let mut grid = Box::new([[None; HEIGHT as usize]; WIDTH as usize]);
         for i in 0..WIDTH {
             for j in 0..HEIGHT {
-                let mut tile = Tile::new(rng.gen(), scene);
-                tile.set_position(scene,
-                    (tile_width as f64 * (i as f64 + 0.5),
-                     tile_height as f64 * (j as f64 + 0.5)));
+                let tile = Tile::new(rng.gen(), scene, Grid::to_coords(i, j));
                 grid[i as usize][j as usize] = Some(tile);
             }
         }
@@ -138,10 +132,15 @@ impl Grid {
             for j in 0..HEIGHT {
                 self.grid[i as usize][j as usize] =
                     self.grid[i as usize][j as usize].or_else(||
-                        Some(Tile::new(rng.gen(), scene))
-                    );
+                        Some(Tile::new(rng.gen(), scene, Grid::to_coords(i, j))));
             }
         }
+    }
+
+    fn to_coords(x: i32, y: i32) -> (f64, f64) {
+        let (tile_width, tile_height) = TileColor::dims();
+        (tile_width as f64 * (x as f64 + 0.5),
+            tile_height as f64 * (y as f64 + 0.5))
     }
 }
 
