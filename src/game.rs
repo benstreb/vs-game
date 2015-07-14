@@ -24,13 +24,13 @@ enum TileColor {
 }
 
 impl TileColor {
-    fn texture(&self) -> Rc<Texture> {
-        Rc::new(Texture::from_path(Path::new(match self {
-            &TileColor::RED => "./bin/assets/red_box.png",
-            &TileColor::GREEN => "./bin/assets/green_box.png",
-            &TileColor::BLUE => "./bin/assets/blue_box.png",
-            &TileColor::YELLOW => "./bin/assets/yellow_box.png",
-        })).unwrap())
+    fn color(&self) -> (f32, f32, f32) {
+        match self {
+            &TileColor::RED => (1.0, 0.0, 0.0),
+            &TileColor::GREEN => (0.0, 1.0, 0.0),
+            &TileColor::BLUE => (0.0, 0.0, 1.0),
+            &TileColor::YELLOW => (1.0, 1.0, 0.0),
+        }
     }
 
     fn dims() -> (i32, i32) {
@@ -78,7 +78,10 @@ struct Tile {
 
 impl Tile {
     fn new(color: TileColor, scene: &mut Scene<Texture>, pos: (f64, f64)) -> Tile {
-        let mut sprite = Sprite::from_texture(color.texture());
+        let mut sprite =
+            Sprite::from_texture(Rc::new(Texture::from_path(Path::new("./bin/assets/box.png")).unwrap()));
+        let (r, g, b) = color.color();
+        sprite.set_color(r, g, b);
         let (x, y) = pos;
         sprite.set_position(x, y);
         let sprite_id = sprite.id();
