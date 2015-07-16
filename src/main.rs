@@ -31,11 +31,11 @@ fn main() {
 
     let mut gl = GlGraphics::new(opengl);
 
-    let rand = rand::thread_rng();
+    let mut rand = rand::thread_rng();
 
-    let mut game = game::UnnamedGame::new(Box::new(rand));
+    let mut game = game::UnnamedGame::new(&mut rand);
 
     for e in window.events() {
-        game.event(&mut gl, &e);
+        game.event(&mut rand, &mut gl, &e);
     }
 }

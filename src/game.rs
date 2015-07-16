@@ -11,11 +11,11 @@ use ai_behavior::{Sequence, Action};
 use sprite::{Sprite, Scene, Ease, EaseFunction, MoveBy};
 
 pub trait Game<R: Rng> {
-    fn new(rng: Box<R>) -> Box<Self>;
-    fn event(&mut self, gl: &mut GlGraphics, event: &Event);
+    fn new(rng: &mut R) -> Box<Self>;
+    fn event(&mut self, rng: &mut R, gl: &mut GlGraphics, event: &Event);
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum TileColor {
     RED,
     GREEN,
@@ -130,12 +130,10 @@ impl Grid {
         }
     }
 
-    fn replace<R: Rng>(&mut self, rng: &mut R, scene: &mut Scene<Texture>) {
+    fn transform(&mut self, f: &mut FnMut(&mut Option<Tile>)) {
         for i in 0..WIDTH {
             for j in 0..HEIGHT {
-                self.grid[i as usize][j as usize] =
-                    self.grid[i as usize][j as usize].or_else(||
-                        Some(Tile::new(rng.gen(), scene, Grid::to_coords(i, j))));
+                f(&mut self.grid[i as usize][j as usize]);
             }
         }
     }
@@ -147,15 +145,14 @@ impl Grid {
     }
 }
 
-pub struct UnnamedGame<R: Rng> {
+pub struct UnnamedGame {
     grid: Grid,
     scene: Box<Scene<Texture>>,
-    rng: Box<R>,
     player_coords: (i32, i32),
     player_id: Uuid,
 }
 
-impl<R: Rng> UnnamedGame<R> {
+impl UnnamedGame {
     fn move_player(&mut self, d: Direction) {
         if self.scene.running() == 0 {
             use utils::move_clamp;
@@ -179,16 +176,21 @@ impl<R: Rng> UnnamedGame<R> {
         }
     }
 
-    fn attack(&mut self) {
+    fn attack<R: Rng>(&mut self, rng: &mut R) {
         if let Some(tile) = self.grid[self.player_coords] {
-            self.scene.remove_child(tile.sprite_id);
-            self.grid[self.player_coords] = None;
+            self.grid.transform(&mut |t: &mut Option<Tile>| {
+                if let Some(&mut other_tile) = t.as_mut() {
+                    if tile.color == other_tile.color {
+                        let (r, g, b) = rng.gen::<TileColor>().color();
+                    }
+                }
+            });
         }
     }
 }
 
-impl<R: Rng> Game<R> for UnnamedGame<R> {
-    fn new(mut rng: Box<R>) -> Box<Self> {
+impl<R: Rng> Game<R> for UnnamedGame {
+    fn new(mut rng: &mut R) -> Box<Self> {
         let (tile_width, tile_height) = TileColor::dims();
         let mut scene = Scene::new();
         let grid = Grid::new::<R>(rng.borrow_mut(), &mut scene);
@@ -200,24 +202,17 @@ impl<R: Rng> Game<R> for UnnamedGame<R> {
         Box::new(UnnamedGame {
             grid: grid,
             scene: Box::new(scene),
-            rng: rng,
             player_coords: (0, 0),
             player_id: player_id,
         })
     }
 
-    fn event(&mut self, gl: &mut GlGraphics, e: &Event) {
+    fn event(&mut self, rng: &mut R, gl: &mut GlGraphics, e: &Event) {
         use graphics::clear;
         const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
 
         self.scene.event(e);
         match e {
-            &Event::Update(_) => {
-                self.grid.replace::<R>(
-                    self.rng.borrow_mut(),
-                    self.scene.borrow_mut()
-                )
-            },
             &Event::Render(r) => gl.draw(r.viewport(), |c, gl| {
                 clear(WHITE, gl);
                 self.scene.draw(c.transform, gl)
@@ -228,7 +223,7 @@ impl<R: Rng> Game<R> for UnnamedGame<R> {
                     Key::Down => self.move_player(Direction::Down),
                     Key::Left => self.move_player(Direction::Left),
                     Key::Right => self.move_player(Direction::Right),
-                    Key::Return | Key::Space => self.attack(),
+                    Key::Return | Key::Space => self.attack(rng),
                     _ => (),
                 },
             _ => (),
