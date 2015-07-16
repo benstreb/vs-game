@@ -91,6 +91,14 @@ impl Tile {
             sprite_id: sprite_id,
         }
     }
+
+    fn set_color(&mut self, color: TileColor, scene: &mut Scene<Texture>) {
+        self.color = color;
+        if let Some(ref mut sprite) = scene.child_mut(self.sprite_id) {
+            let (r, g, b) = color.color();
+            sprite.set_color(r, g, b);
+        }
+    }
 }
 
 const WIDTH: i32 = 5;
@@ -178,10 +186,12 @@ impl UnnamedGame {
 
     fn attack<R: Rng>(&mut self, rng: &mut R) {
         if let Some(tile) = self.grid[self.player_coords] {
+            let scene: &mut Scene<_> = self.scene.borrow_mut();
             self.grid.transform(&mut |t: &mut Option<Tile>| {
-                if let Some(&mut other_tile) = t.as_mut() {
+                if let Some(other_tile) = t.as_mut() {
                     if tile.color == other_tile.color {
-                        let (r, g, b) = rng.gen::<TileColor>().color();
+                        let color = rng.gen::<TileColor>();
+                        other_tile.set_color(color, scene);
                     }
                 }
             });
