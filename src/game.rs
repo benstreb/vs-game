@@ -206,6 +206,8 @@ impl<R: Rng> Game<R> for UnnamedGame {
         let grid = Grid::new::<R>(rng.borrow_mut(), &mut scene);
         let mut player = Sprite::from_texture(Rc::new(Texture::from_path(
             Path::new("./bin/assets/player.png")).unwrap()));
+        player.set_rotation(45.0);
+        player.set_scale(0.72, 0.72);
         player.set_position((tile_width/2) as f64, (tile_height/2) as f64);
         let player_id = player.id();
         scene.add_child(player);
