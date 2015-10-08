@@ -5,8 +5,7 @@ use std::borrow::BorrowMut;
 use uuid::Uuid;
 use rand::{Rand, Rng};
 use opengl_graphics::{GlGraphics, Texture};
-use piston::event::Event;
-use piston::input::{Input, Button, Key};
+use piston::input::{Event, Input, Button, Key};
 use ai_behavior::{Sequence, Action};
 use sprite::{Sprite, Scene, Ease, EaseFunction, MoveBy};
 

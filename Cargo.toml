@@ -10,26 +10,13 @@ authors = [
 name = "vs-game-rust"
 path = "src/main.rs"
 
-[dependencies.piston]
-git = "https://github.com/PistonDevelopers/piston.git"
-
-[dependencies.piston2d-graphics]
-git = "https://github.com/PistonDevelopers/graphics.git"
-
-[dependencies.pistoncore-glutin_window]
-git = "https://github.com/PistonDevelopers/glutin_window.git"
-
-[dependencies.piston2d-opengl_graphics]
-git = "https://github.com/PistonDevelopers/opengl_graphics.git"
-
-[dependencies.piston-ai_behavior]
-git = "https://github.com/pistondevelopers/ai_behavior"
-
-[dependencies.piston2d-sprite]
-git = "https://github.com/pistondevelopers/sprite"
-
-[dependencies.uuid]
-git = "https://github.com/rust-lang/uuid"
-
-[dependencies.rand]
-git = "https://github.com/rust-lang/rand"
+[dependencies]
+piston = '*'
+piston2d-graphics = '*'
+pistoncore-glutin_window = '*'
+piston2d-opengl_graphics = '*'
+piston-ai_behavior = '*'
+piston2d-sprite = '*'
+image = '*'
+uuid = '*'
+rand = '*'

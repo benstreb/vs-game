@@ -12,22 +12,21 @@ mod utils;
 
 use rand::thread_rng;
 use piston::window::WindowSettings;
-use piston::event::Events;
+use piston::event_loop::Events;
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
 use game::{Game, UnnamedGame};
 
 fn main() {
-    let opengl = OpenGL::_3_2;
+    let opengl = OpenGL::V3_2;
 
     let window = Window::new(
-        opengl,
         WindowSettings::new(
             "vs-game",
             [200, 200],
         )
         .exit_on_esc(true)
-    );
+    ).unwrap();
 
     let mut gl = GlGraphics::new(opengl);
 
